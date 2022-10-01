@@ -29,19 +29,12 @@ from hummingbot.strategy.strategy_py_base import StrategyPyBase
 from hummingbot.core.data_type.order_book import OrderBook
 from hummingbot.core.event.event_listener import EventListener
 from hummingbot.core.event.events import OrderBookEvent
+from hummingbot.strategy.__utils__.trailing_indicators.trades_collector import TradingIntensityIndicator
 
 from sqlalchemy import create_engine
 import sqlalchemy as db
 
 twap_logger = None
-
-
-class TradesForwarder(EventListener):
-    def __init__(self, strategy: 'TwapTradeStrategy'):
-        self._indicator = strategy
-
-    def call(self, arg: object):
-        self._indicator.register_trade(arg)
 
 
 class TwapTradeStrategy(StrategyPyBase):
@@ -96,12 +89,6 @@ class TwapTradeStrategy(StrategyPyBase):
 
         self._engine = " "
         self._connection = " "
-
-        self._trades_forwarder = TradesForwarder(self)
-        self._order_book = order_book
-        self._order_book.c_add_listener(
-            OrderBookEvent.TradeEvent.value, self._trades_forwarder)
-
         all_markets = set([market_info.market for market_info in market_infos])
         self.add_markets(list(all_markets))
 
@@ -115,14 +102,7 @@ class TwapTradeStrategy(StrategyPyBase):
                          f"{market_info.quote_asset}    "
                          f"Order size: {PerformanceMetrics.smart_round(self._order_step_size)} "
                          f"{market_info.base_asset}")
-
         return lines
-
-    def register_trade(self, trade: object):
-        self.log_with_clock(
-            logging.INFO,
-            f"just registered a trade"
-        )
 
     def format_status(self) -> str:
         lines: list = []
@@ -163,12 +143,6 @@ class TwapTradeStrategy(StrategyPyBase):
     def start(self, clock: Clock, timestamp: float):
         self._previous_timestamp = timestamp
         self._last_timestamp = timestamp
-
-        self._engine = create_engine(
-            'mysql+pymysql://hb:Jelle123@hb.ceh1qcgkh4yh.ap-northeast-1.rds.amazonaws.com/Hummingbot')
-        self._connection = self._engine.connect()
-
-        self._engine.execute('''DROP TABLE IF EXISTS DATA_COLLECTION''')
 
         self.log_with_clock(
             logging.INFO,
@@ -523,8 +497,5 @@ class TwapTradeStrategy(StrategyPyBase):
                             self._market_info.order_book.snapshot
                             )])
         df.to_csv(self._location, mode='a', header=False, index=False)
-
-        df.to_sql('DATA_COLLECTION', con=self._connection,
-                  if_exists='append', index=False)
 
         #'/Users/jellebuth/Documents/test4.csv'

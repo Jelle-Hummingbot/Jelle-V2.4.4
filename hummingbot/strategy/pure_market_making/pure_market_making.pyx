@@ -30,7 +30,6 @@ from .pure_market_making_order_tracker import PureMarketMakingOrderTracker
 from .moving_price_band import MovingPriceBand
 from hummingbot.strategy.pure_market_making.get_candlestick import get_candlestick
 from hummingbot.strategy.__utils__.trailing_indicators.average_volatility import AverageVolatilityIndicator
-from hummingbot.strategy.pure_market_making.database import *
 from sqlalchemy import create_engine
 import sqlalchemy as db
 
@@ -831,8 +830,6 @@ cdef class PureMarketMakingStrategy(StrategyBase):
 
         self._engine = create_engine('mysql+pymysql://hb:Jelle123@hb.ceh1qcgkh4yh.ap-northeast-1.rds.amazonaws.com/Hummingbot')
         self._connection = self._engine.connect()
-
-        self._engine.execute('''CREATE TABLE IF NOT EXISTS TRADES_DF''')
 
         self.log_with_clock(
             logging.INFO,

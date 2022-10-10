@@ -12,7 +12,8 @@ from typing import Optional
 
 
 def maker_trading_pair_prompt():
-    maker_market = cross_exchange_market_making_config_map.get("maker_market").value
+    maker_market = cross_exchange_market_making_config_map.get(
+        "maker_market").value
     example = settings.AllConnectorSettings.get_example_pairs().get(maker_market)
     return "Enter the token trading pair you would like to trade on maker market: %s%s >>> " % (
         maker_market,
@@ -21,7 +22,8 @@ def maker_trading_pair_prompt():
 
 
 def taker_trading_pair_prompt():
-    taker_market = cross_exchange_market_making_config_map.get("taker_market").value
+    taker_market = cross_exchange_market_making_config_map.get(
+        "taker_market").value
     example = settings.AllConnectorSettings.get_example_pairs().get(taker_market)
     return "Enter the token trading pair you would like to trade on taker market: %s%s >>> " % (
         taker_market,
@@ -37,12 +39,14 @@ def top_depth_tolerance_prompt() -> str:
 
 # strategy specific validators
 def validate_maker_market_trading_pair(value: str) -> Optional[str]:
-    maker_market = cross_exchange_market_making_config_map.get("maker_market").value
+    maker_market = cross_exchange_market_making_config_map.get(
+        "maker_market").value
     return validate_market_trading_pair(maker_market, value)
 
 
 def validate_taker_market_trading_pair(value: str) -> Optional[str]:
-    taker_market = cross_exchange_market_making_config_map.get("taker_market").value
+    taker_market = cross_exchange_market_making_config_map.get(
+        "taker_market").value
     return validate_market_trading_pair(taker_market, value)
 
 
@@ -58,13 +62,16 @@ def taker_market_on_validated(value: str):
 
 def update_oracle_settings(value: str):
     c_map = cross_exchange_market_making_config_map
-    if not (c_map["use_oracle_conversion_rate"].value is not None and
-            c_map["maker_market_trading_pair"].value is not None and
-            c_map["taker_market_trading_pair"].value is not None):
+    if not (c_map["use_oracle_conversion_rate"].value is not None
+            and c_map["maker_market_trading_pair"].value is not None
+            and c_map["taker_market_trading_pair"].value is not None):
         return
-    use_oracle = parse_cvar_value(c_map["use_oracle_conversion_rate"], c_map["use_oracle_conversion_rate"].value)
-    first_base, first_quote = c_map["maker_market_trading_pair"].value.split("-")
-    second_base, second_quote = c_map["taker_market_trading_pair"].value.split("-")
+    use_oracle = parse_cvar_value(
+        c_map["use_oracle_conversion_rate"], c_map["use_oracle_conversion_rate"].value)
+    first_base, first_quote = c_map["maker_market_trading_pair"].value.split(
+        "-")
+    second_base, second_quote = c_map["taker_market_trading_pair"].value.split(
+        "-")
     if use_oracle and (first_base != second_base or first_quote != second_quote):
         settings.required_rate_oracle = True
         settings.rate_oracle_pairs = []
@@ -86,7 +93,6 @@ cross_exchange_market_making_config_map = {
         key="maker_market",
         prompt="Enter your maker spot connector >>> ",
         prompt_on_new=True,
-        validator=validate_exchange,
         on_validated=lambda value: settings.required_exchanges.append(value),
     ),
     "taker_market": ConfigVar(
@@ -115,7 +121,8 @@ cross_exchange_market_making_config_map = {
         key="min_profitability",
         prompt="What is the minimum profitability for you to make a trade? (Enter 1 to indicate 1%) >>> ",
         prompt_on_new=True,
-        validator=lambda v: validate_decimal(v, Decimal(-100), Decimal("100"), inclusive=True),
+        validator=lambda v: validate_decimal(
+            v, Decimal(-100), Decimal("100"), inclusive=True),
         type_str="decimal",
     ),
     "order_amount": ConfigVar(
@@ -123,7 +130,8 @@ cross_exchange_market_making_config_map = {
         prompt=order_amount_prompt,
         prompt_on_new=True,
         type_str="decimal",
-        validator=lambda v: validate_decimal(v, min_value=Decimal("0"), inclusive=False),
+        validator=lambda v: validate_decimal(
+            v, min_value=Decimal("0"), inclusive=False),
     ),
     "min_order_amount": ConfigVar(
         key="min_order_amount",
@@ -156,7 +164,8 @@ cross_exchange_market_making_config_map = {
         default=5,
         type_str="decimal",
         required_if=lambda: False,
-        validator=lambda v: validate_decimal(v, min_value=Decimal(-100), max_value=Decimal(100), inclusive=False),
+        validator=lambda v: validate_decimal(
+            v, min_value=Decimal(-100), max_value=Decimal(100), inclusive=False),
     ),
     "limit_order_min_expiration": ConfigVar(
         key="limit_order_min_expiration",
@@ -171,14 +180,14 @@ cross_exchange_market_making_config_map = {
     "cancel_order_timer": ConfigVar(
         key="cancel_order_timer",
         prompt="Do you want to cancel your orders every x seconds as a safety? >>> ",
-        default= True,
+        default=True,
         type_str="bool",
     ),
 
     "cancel_order_timer_seconds": ConfigVar(
         key="cancel_order_timer_seconds",
         prompt="Cancel all orders once every x seconds >>> ",
-        default= 1800,
+        default=1800,
         type_str="float",
     ),
 
@@ -308,7 +317,8 @@ cross_exchange_market_making_config_map = {
         default=Decimal("95.0"),
         type_str="decimal",
         required_if=lambda: False,
-        validator=lambda v: validate_decimal(v, Decimal(0), Decimal(100), inclusive=True)
+        validator=lambda v: validate_decimal(
+            v, Decimal(0), Decimal(100), inclusive=True)
     ),
 
     "order_size_maker_balance_factor": ConfigVar(
@@ -318,7 +328,8 @@ cross_exchange_market_making_config_map = {
         default=Decimal("95.0"),
         type_str="decimal",
         required_if=lambda: False,
-        validator=lambda v: validate_decimal(v, Decimal(0), Decimal(100), inclusive=False)
+        validator=lambda v: validate_decimal(
+            v, Decimal(0), Decimal(100), inclusive=False)
     ),
 
 
@@ -329,7 +340,8 @@ cross_exchange_market_making_config_map = {
         default=Decimal("95.0"),
         type_str="decimal",
         required_if=lambda: False,
-        validator=lambda v: validate_decimal(v, Decimal(0), Decimal(100), inclusive=False)
+        validator=lambda v: validate_decimal(
+            v, Decimal(0), Decimal(100), inclusive=False)
     ),
     "order_size_portfolio_ratio_limit": ConfigVar(
         key="order_size_portfolio_ratio_limit",
@@ -338,7 +350,8 @@ cross_exchange_market_making_config_map = {
         default=Decimal("16.67"),
         type_str="decimal",
         required_if=lambda: False,
-        validator=lambda v: validate_decimal(v, Decimal(0), Decimal(100), inclusive=False)
+        validator=lambda v: validate_decimal(
+            v, Decimal(0), Decimal(100), inclusive=False)
     ),
     "use_oracle_conversion_rate": ConfigVar(
         key="use_oracle_conversion_rate",
@@ -372,6 +385,7 @@ cross_exchange_market_making_config_map = {
         prompt_on_new=True,
         default=Decimal("5"),
         type_str="decimal",
-        validator=lambda v: validate_decimal(v, Decimal(0), Decimal(100), inclusive=True)
+        validator=lambda v: validate_decimal(
+            v, Decimal(0), Decimal(100), inclusive=True)
     )
 }

@@ -31,6 +31,9 @@ from .order_id_market_pair_tracker import OrderIDMarketPairTracker
 from hummingbot.core.rate_oracle.rate_oracle import RateOracle
 from hummingbot.client.performance import PerformanceMetrics
 
+
+from hummingbot.client.settings import AllConnectorSettings
+
 NaN = float("nan")
 s_decimal_zero = Decimal(0)
 s_decimal_nan = Decimal("nan")
@@ -227,6 +230,7 @@ cdef class CrossExchangeMarketMakingStrategy(StrategyBase):
     @logging_options.setter
     def logging_options(self, int64_t logging_options):
         self._logging_options = logging_options
+
 
     def get_taker_to_maker_conversion_rate(self) -> Tuple[str, Decimal, str, Decimal]:
         """
@@ -1350,10 +1354,13 @@ cdef class CrossExchangeMarketMakingStrategy(StrategyBase):
                 taker_price = (self.c_calculate_effective_hedging_price(market_pair, True, user_order))
             except ZeroDivisionError:
                 assert user_order == s_decimal_zero
+                self.log_with_clock(
+                  logging.INFO,
+                  f"zero devision error"
+
+                  )
                 return s_decimal_zero
 
-            #Base converion: taker balance is in BTC, multiply this by the taker price, then you have an usdt amount you can buy, then convert the usdt to an FRONT amount. needs to be converted to an FRONT amount (maker to taker = * rate) (taker to maker = / rate)
-            # quote converions: taker balance in SHR is the max sellable, convert this to
             taker_balance = ((taker_market.c_get_available_balance(market_pair.taker.base_asset) * \
                                 self._order_size_taker_balance_factor) * base_rate) #check why it is done twice
 
@@ -1361,6 +1368,10 @@ cdef class CrossExchangeMarketMakingStrategy(StrategyBase):
             #maker balance in quote: taker price is taker asset, so needs to be converted back. But it should actually be the FRONT-USDT price therefore we take a margin of error of 2%
 
             #be aware that i should actually use price for quote colume, not effective hedging price
+            self.log_with_clock(
+              logging.INFO,
+              f"DEBUG: maker balance in quote {maker_balance_in_quote} effective heding price {self.c_calculate_effective_hedging_price(market_pair, True, user_order)} "
+              )
             maker_balance = ((maker_balance_in_quote * self._order_size_maker_balance_factor) / (self.c_calculate_effective_hedging_price(market_pair, True, user_order) / (1 + self._min_profitability)))
 
             order_amount = min(maker_balance, taker_balance, user_order)

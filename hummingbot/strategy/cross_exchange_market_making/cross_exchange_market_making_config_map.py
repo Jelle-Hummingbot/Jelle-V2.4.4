@@ -360,6 +360,28 @@ cross_exchange_market_making_config_map = {
         prompt_on_new=True,
         validator=lambda v: validate_bool(v),
         on_validated=update_oracle_settings),
+
+
+    "maker_perpetual": ConfigVar(
+        key="maker_perpetual",
+        type_str="bool",
+        prompt="maker_perpetual? (Yes/No) >>> ",
+        prompt_on_new=False,
+        validator=lambda v: validate_bool(v)),
+
+    "taker_perpetual": ConfigVar(
+        key="taker_perpetual",
+        type_str="bool",
+        prompt="taker_perpetual (Yes/No) >>> ",
+        prompt_on_new=False,
+        validator=lambda v: validate_bool(v)),
+    "use_min_profit_for_taker_price": ConfigVar(
+        key="use_min_profit_for_taker_price",
+        type_str="bool",
+        prompt="Do you want to use use_min_profit_for_taker_price? (Yes/No) >>> ",
+        prompt_on_new=True,
+        validator=lambda v: validate_bool(v)),
+
     "taker_to_maker_base_conversion_rate": ConfigVar(
         key="taker_to_maker_base_conversion_rate",
         prompt="Enter conversion rate for taker base asset value to maker base asset value, e.g. "
@@ -378,6 +400,9 @@ cross_exchange_market_making_config_map = {
         validator=lambda v: validate_decimal(v, Decimal(0), inclusive=False),
         type_str="decimal"
     ),
+
+
+
     "slippage_buffer": ConfigVar(
         key="slippage_buffer",
         prompt="How much buffer do you want to add to the price to account for slippage for taker orders "

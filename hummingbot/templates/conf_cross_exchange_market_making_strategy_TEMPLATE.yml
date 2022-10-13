@@ -115,5 +115,10 @@ balance_fix_maker: null
 top_maker_cancel_seconds: null
 
 
+taker_perpetual : null
+maker_perpetual : null
+use_min_profit_for_taker_price : null
+
+
 # For more detailed information, see:
 # https://docs.hummingbot.io/strategies/cross-exchange-market-making/#configuration-parameters
